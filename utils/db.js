@@ -21,9 +21,10 @@ class DBClient {
       await this.client.connect((err) => {
         if (err) console.log("Error:", "Failed to connect to DB", err.message);
         this.connected = true;
-        this.db = this.client.db(database);
       });
     })();
+
+    this.db = this.client.db(database);
   }
 
   isAlive() {
