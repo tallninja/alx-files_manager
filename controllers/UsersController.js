@@ -1,5 +1,7 @@
 import sha1 from "sha1";
+import { ObjectId } from "mongodb";
 import dbClient from "../utils/db";
+import redisClient from "../utils/redis";
 
 const usersCollection = dbClient.db?.collection("users");
 
@@ -33,4 +35,33 @@ const postNew = async (req, res) => {
   }
 };
 
-export default { postNew };
+const getMe = async (req, res) => {
+  try {
+    // extract token from header
+    const token = req.headers["x-token"];
+
+    // check if token has been provided
+    if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+    const key = `auth_${token}`;
+
+    // fetch user based on token
+    const userId = await redisClient.get(key);
+
+    // check if user exists in redis
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    // check if user exists in DB
+    const user = await usersCollection.findOne({ _id: ObjectId(userId) });
+
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
+
+    // return user
+    return res.status(200).json({ id: user._id, email: user.email });
+  } catch (error) {
+    console.log("Error:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export default { postNew, getMe };
