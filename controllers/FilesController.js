@@ -34,7 +34,7 @@ const postUpload = async (req, res) => {
         name,
         type,
         parentId,
-        isPublic,
+        isPublic: isPublic || false,
         userId: ObjectId(req.userId),
       });
       return res.status(201).json(newFolder?.ops[0]);
@@ -57,7 +57,7 @@ const postUpload = async (req, res) => {
       const newFile = await filesCollection.insertOne({
         name,
         type,
-        isPublic,
+        isPublic: isPublic || false,
         parentId: parentId || 0,
         userId: ObjectId(req.userId),
         localPath: filePath,
