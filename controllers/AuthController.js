@@ -53,22 +53,8 @@ const getConnect = async (req, res) => {
 
 const getDisconnect = async (req, res) => {
   try {
-    // extract token from header
-    const token = req.headers["x-token"];
-
-    // check if token has been provided
-    if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-    const key = `auth_${token}`;
-
-    // fetch user based on token
-    const userId = await redisClient.get(key);
-
-    // check if user exists in redis
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
-
     // check if user exists in DB
-    const user = await usersCollection.findOne({ _id: ObjectId(userId) });
+    const user = await usersCollection.findOne({ _id: ObjectId(req.userId) });
     if (!user) {
       // delete token from redis
       await redisClient.del(token);
